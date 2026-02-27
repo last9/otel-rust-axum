@@ -342,11 +342,9 @@ impl TracedRequestBuilder {
 
 /// Inject trace context into request headers.
 fn inject_trace_context(request: RequestBuilder, context: &Context) -> RequestBuilder {
-    let mut headers = Vec::new();
+    let mut headers = std::collections::HashMap::new();
     global::get_text_map_propagator(|propagator| {
-        propagator.inject_context(context, &mut |key, value| {
-            headers.push((key.to_string(), value));
-        });
+        propagator.inject_context(context, &mut headers);
     });
 
     let mut req = request;

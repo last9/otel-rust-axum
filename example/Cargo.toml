@@ -18,17 +18,13 @@ path = "src/graphql_example.rs"
 
 [dependencies]
 # Auto-instrumentation library
-rust-otel-auto = { path = "../rust-otel-auto", features = ["actix-web", "graphql", "reqwest"] }
+rust-otel-auto = { path = "../rust-otel-auto", default-features = false, features = ["actix-web", "reqwest"] }
 
 # Async runtime
 tokio = { workspace = true }
 
 # HTTP frameworks
 actix-web = { workspace = true }
-
-# GraphQL
-async-graphql = { workspace = true }
-async-graphql-actix-web = { workspace = true }
 
 # HTTP client
 reqwest = { workspace = true }

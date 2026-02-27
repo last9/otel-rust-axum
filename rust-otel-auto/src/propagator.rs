@@ -111,10 +111,14 @@ impl TextMapPropagator for W3CTraceContextPropagator {
     }
 
     fn fields(&self) -> opentelemetry::propagation::text_map_propagator::FieldIter<'_> {
-        opentelemetry::propagation::text_map_propagator::FieldIter::new(&[
-            TRACEPARENT_HEADER,
-            TRACESTATE_HEADER,
-        ])
+        use once_cell::sync::Lazy;
+        static FIELDS: Lazy<Vec<String>> = Lazy::new(|| {
+            vec![
+                TRACEPARENT_HEADER.to_string(),
+                TRACESTATE_HEADER.to_string(),
+            ]
+        });
+        opentelemetry::propagation::text_map_propagator::FieldIter::new(&FIELDS)
     }
 }
 

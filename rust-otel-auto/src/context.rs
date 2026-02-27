@@ -17,9 +17,6 @@ pub trait ContextExt {
     /// Attach this context for the duration of a future.
     fn attach_to<F: Future>(self, future: F) -> WithContext<F>;
 
-    /// Get the current span from the context.
-    fn current_span(&self) -> &dyn Span;
-
     /// Get the span context from the current span.
     fn span_context(&self) -> SpanContext;
 
@@ -33,10 +30,6 @@ impl ContextExt for Context {
             inner: future,
             context: self,
         }
-    }
-
-    fn current_span(&self) -> &dyn Span {
-        self.span()
     }
 
     fn span_context(&self) -> SpanContext {
@@ -157,11 +150,11 @@ where
     I: IntoIterator<Item = (&'a str, &'a str)>,
 {
     use opentelemetry::global;
-    use opentelemetry::propagation::TextMapPropagator;
 
-    let propagator = global::get_text_map_propagator(|p| p.clone());
     let extractor = HeaderExtractor::new(headers);
-    propagator.extract(&extractor)
+    global::get_text_map_propagator(|propagator| {
+        propagator.extract(&extractor)
+    })
 }
 
 /// Inject the current trace context into a mutable header map.
@@ -170,12 +163,12 @@ where
     F: FnMut(&str, String),
 {
     use opentelemetry::global;
-    use opentelemetry::propagation::TextMapPropagator;
 
-    let propagator = global::get_text_map_propagator(|p| p.clone());
     let context = Context::current();
     let mut injector = HeaderInjector::new(inject_fn);
-    propagator.inject_context(&context, &mut injector);
+    global::get_text_map_propagator(|propagator| {
+        propagator.inject_context(&context, &mut injector);
+    });
 }
 
 /// Header extractor for extracting context from HTTP headers.

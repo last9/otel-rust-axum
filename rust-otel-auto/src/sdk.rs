@@ -82,21 +82,19 @@ pub fn init_with_config(config: OtelConfig) -> OtelResult<OtelSdkGuard> {
     // Create the OTLP exporter
     let exporter = create_otlp_exporter(&config)?;
 
-    // Create the batch span processor
-    let batch_processor = BatchSpanProcessor::builder(exporter, Tokio)
-        .with_max_queue_size(config.batch_config.max_queue_size)
-        .with_max_export_batch_size(config.batch_config.max_export_batch_size)
-        .with_scheduled_delay(config.batch_config.scheduled_delay)
-        .with_max_export_timeout(config.batch_config.max_export_timeout)
+    // Build the tracer provider with configuration and batch processor
+    let provider = SdkTracerProvider::builder()
+        .with_config(
+            trace::config()
+                .with_resource(resource)
+                .with_sampler(sampler)
+                .with_id_generator(RandomIdGenerator::default())
+        )
+        .with_batch_exporter(exporter, Tokio)
         .build();
 
-    // Build the tracer provider
-    let provider = SdkTracerProvider::builder()
-        .with_resource(resource)
-        .with_sampler(sampler)
-        .with_id_generator(RandomIdGenerator::default())
-        .with_span_processor(batch_processor)
-        .build();
+    // Get tracer before setting as global (for tracing integration)
+    let tracer = provider.tracer("rust-otel-auto");
 
     // Set as global provider
     let _ = global::set_tracer_provider(provider.clone());
@@ -107,8 +105,8 @@ pub fn init_with_config(config: OtelConfig) -> OtelResult<OtelSdkGuard> {
     // Mark as initialized
     let _ = INITIALIZED.set(());
 
-    // Set up tracing-opentelemetry integration
-    setup_tracing_integration();
+    // Set up tracing-opentelemetry integration with the concrete tracer
+    setup_tracing_integration(tracer);
 
     Ok(OtelSdkGuard { _private: () })
 }
@@ -184,12 +182,11 @@ fn create_otlp_exporter(
 }
 
 /// Set up the tracing-opentelemetry integration.
-fn setup_tracing_integration() {
+fn setup_tracing_integration(tracer: opentelemetry_sdk::trace::Tracer) {
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
     use tracing_subscriber::EnvFilter;
 
-    let tracer = global::tracer("rust-otel-auto");
     let telemetry_layer = tracing_opentelemetry::layer().with_tracer(tracer);
 
     let filter = EnvFilter::try_from_default_env()
@@ -208,13 +205,14 @@ fn setup_tracing_integration() {
 pub fn shutdown() {
     if let Some(provider) = TRACER_PROVIDER.get() {
         if let Some(provider) = provider.lock().take() {
-            // Force flush and shutdown
-            if let Err(e) = provider.force_flush() {
-                eprintln!("Warning: Failed to flush tracer provider: {:?}", e);
+            // Force flush - returns Vec<Result<(), TraceError>>
+            let flush_results = provider.force_flush();
+            for result in flush_results {
+                if let Err(e) = result {
+                    eprintln!("Warning: Failed to flush tracer provider: {:?}", e);
+                }
             }
-            if let Err(e) = provider.shutdown() {
-                eprintln!("Warning: Failed to shutdown tracer provider: {:?}", e);
-            }
+            // Provider will be dropped here, which triggers shutdown
         }
     }
     global::shutdown_tracer_provider();

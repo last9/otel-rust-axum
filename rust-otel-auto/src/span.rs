@@ -197,7 +197,7 @@ where
     F: std::future::Future<Output = T>,
 {
     let context = SpanBuilder::new(name).start();
-    let _guard = context.attach();
+    let _guard = context.clone().attach();
     let result = future.await;
     use opentelemetry::trace::TraceContextExt;
     context.span().end();
