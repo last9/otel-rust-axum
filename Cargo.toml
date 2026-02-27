@@ -36,7 +36,7 @@ tower = "0.4"
 tower-http = { version = "0.4", features = ["trace"] }
 
 # GraphQL - pinned for 1.74 compatibility (5.x for pest compatibility)
-async-graphql = "5.0"
+async-graphql = "7.0"
 async-graphql-actix-web = "5.0"
 juniper = "0.15"
 
