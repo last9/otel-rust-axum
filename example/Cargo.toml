@@ -1,0 +1,42 @@
+[package]
+name = "rust-otel-example"
+description = "Example application demonstrating Rust OpenTelemetry auto-instrumentation"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[[bin]]
+name = "actix-example"
+path = "src/actix_example.rs"
+
+[[bin]]
+name = "graphql-example"
+path = "src/graphql_example.rs"
+
+[dependencies]
+# Auto-instrumentation library
+rust-otel-auto = { path = "../rust-otel-auto", features = ["actix-web", "graphql", "reqwest"] }
+
+# Async runtime
+tokio = { workspace = true }
+
+# HTTP frameworks
+actix-web = { workspace = true }
+
+# GraphQL
+async-graphql = { workspace = true }
+async-graphql-actix-web = { workspace = true }
+
+# HTTP client
+reqwest = { workspace = true }
+
+# Serialization
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# Utilities
+chrono = { workspace = true }
+dotenvy = { workspace = true }
