@@ -1,0 +1,54 @@
+[workspace]
+resolver = "2"
+members = [
+    "rust-otel-auto",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+license = "Apache-2.0"
+repository = "https://github.com/last9/rust-opentelemetry"
+authors = ["Last9 <support@last9.io>"]
+
+[workspace.dependencies]
+# OpenTelemetry 0.27 — highest version with MSRV 1.70 (compatible with Rust 1.74).
+# opentelemetry 0.28+ bumped MSRV to 1.75.
+opentelemetry = { version = "0.27", features = ["trace"] }
+opentelemetry_sdk = { version = "0.27", features = ["rt-tokio"] }
+# default-features = false drops grpc-tonic which pulls in tonic/hyper 1.x.
+# reqwest-client: auto-creates the HTTP client.
+# reqwest-rustls-webpki-roots: adds TLS — both are required together.
+opentelemetry-otlp = { version = "0.27", default-features = false, features = [
+    "http-proto",
+    "reqwest-client",
+    "reqwest-rustls-webpki-roots",
+] }
+opentelemetry-semantic-conventions = "0.27"
+
+# Axum 0.6 — axum 0.7+ requires Rust 1.75
+axum = "0.6"
+tower = "0.4"
+tower-http = { version = "0.4", features = ["trace"] }
+tokio = { version = "1", features = ["full"] }
+
+# reqwest 0.12 — rustls-tls-webpki-roots avoids security-framework 3.x (Rust 1.83)
+reqwest = { version = "0.12", default-features = false, features = [
+    "json",
+    "rustls-tls-webpki-roots",
+] }
+
+# Tracing
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"] }
+tracing-opentelemetry = "0.28"
+
+# Serialization
+serde      = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Pin to avoid icu4x transitive deps that require Rust 1.83+
+# idna 1.x -> icu_properties_data -> needs rustc >= 1.83
+url = "=2.5.0"
+idna = "=0.5.0"

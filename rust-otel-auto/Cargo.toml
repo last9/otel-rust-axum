@@ -1,0 +1,34 @@
+[package]
+name = "rust-otel-auto"
+description = "Auto-instrumentation for Rust 1.74 + OpenTelemetry 0.27 + Axum 0.6"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+keywords = ["opentelemetry", "tracing", "axum", "observability", "last9"]
+categories = ["development-tools::debugging", "development-tools::profiling"]
+
+[features]
+default = ["axum", "reqwest"]
+axum    = ["dep:axum", "dep:tower", "dep:tower-http"]
+reqwest = ["dep:reqwest"]
+db      = []   # no extra deps — only tracing macros
+
+[dependencies]
+opentelemetry                  = { workspace = true }
+opentelemetry_sdk              = { workspace = true }
+opentelemetry-otlp             = { workspace = true }
+opentelemetry-semantic-conventions = { workspace = true }
+tokio                          = { workspace = true }
+tracing                        = { workspace = true }
+tracing-subscriber             = { workspace = true }
+tracing-opentelemetry          = { workspace = true }
+serde                          = { workspace = true }
+serde_json                     = { workspace = true }
+
+axum       = { workspace = true, optional = true }
+tower      = { workspace = true, optional = true }
+tower-http = { workspace = true, optional = true }
+reqwest    = { workspace = true, optional = true }
