@@ -1,5 +1,5 @@
 [package]
-name = "rust-otel-auto"
+name = "otel-rust-axum"
 description = "Auto-instrumentation for Rust 1.74 + OpenTelemetry 0.27 + Axum 0.6"
 version.workspace = true
 edition.workspace = true

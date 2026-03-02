@@ -14,8 +14,8 @@
 //!
 //! ```rust,no_run
 //! use axum::{Router, middleware, routing::get};
-//! use rust_otel_auto::{init, current_trace_id};
-//! use rust_otel_auto::layer::{OtelLayer, record_matched_route};
+//! use otel_rust_axum::{init, current_trace_id};
+//! use otel_rust_axum::layer::{OtelLayer, record_matched_route};
 //!
 //! #[tokio::main]
 //! async fn main() {
@@ -55,7 +55,7 @@ pub use sdk::{init, TelemetryGuard};
 /// line directly to the corresponding trace in your APM tool:
 ///
 /// ```rust,ignore
-/// tracing::info!(trace_id = %rust_otel_auto::current_trace_id(), "user created");
+/// tracing::info!(trace_id = %otel_rust_axum::current_trace_id(), "user created");
 /// ```
 pub fn current_trace_id() -> String {
     use opentelemetry::trace::TraceContextExt;

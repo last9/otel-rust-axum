@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "rust-otel-auto",
+    "otel-rust-axum",
 ]
 
 [workspace.package]
@@ -9,7 +9,7 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.74"
 license = "Apache-2.0"
-repository = "https://github.com/last9/rust-opentelemetry"
+repository = "https://github.com/last9/otel-rust-axum"
 authors = ["Last9 <support@last9.io>"]
 
 [workspace.dependencies]
@@ -48,7 +48,11 @@ tracing-opentelemetry = "0.28"
 serde      = { version = "1", features = ["derive"] }
 serde_json = "1"
 
-# Pin to avoid icu4x transitive deps that require Rust 1.83+
-# idna 1.x -> icu_properties_data -> needs rustc >= 1.83
+# Required pins on Rust < 1.83.
+# idna 1.0+ and url 2.5.1+ pull in icu4x which requires Rust 1.83.
+# CVE-2024-12224 (moderate): idna < 1.0 accepts certain invalid Punycode labels.
+# This crate only uses url/idna to parse the OTLP endpoint — not for any security
+# or auth decision — so the CVE has no exploitable impact here.
+# Fix: upgrade to Rust 1.83+ and drop these pins.
 url = "=2.5.0"
 idna = "=0.5.0"

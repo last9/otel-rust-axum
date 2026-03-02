@@ -3,7 +3,7 @@
 //! # Usage
 //!
 //! ```rust,no_run
-//! use rust_otel_auto::client::TracedClient;
+//! use otel_rust_axum::client::TracedClient;
 //!
 //! let client = TracedClient::new();
 //! let resp = client.get("https://api.example.com/data").send().await?;
@@ -36,7 +36,7 @@ impl<'a> Injector for HeaderInjector<'a> {
 /// Use this when building requests manually with an existing `reqwest::Client`:
 /// ```rust,no_run
 /// let mut headers = reqwest::header::HeaderMap::new();
-/// rust_otel_auto::client::inject_trace_context(&mut headers);
+/// otel_rust_axum::client::inject_trace_context(&mut headers);
 /// client.get(url).headers(headers).send().await?;
 /// ```
 pub fn inject_trace_context(headers: &mut HeaderMap) {
@@ -54,7 +54,7 @@ pub fn inject_trace_context(headers: &mut HeaderMap) {
 ///
 /// # Example
 /// ```rust,no_run
-/// let client = rust_otel_auto::client::TracedClient::new();
+/// let client = otel_rust_axum::client::TracedClient::new();
 /// let data: serde_json::Value = client
 ///     .get("https://api.example.com/users")
 ///     .send().await?

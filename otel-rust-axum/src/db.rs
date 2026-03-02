@@ -4,7 +4,7 @@
 //! `db.*` attributes. Enter the span before your database call:
 //!
 //! ```rust,no_run
-//! use rust_otel_auto::db;
+//! use otel_rust_axum::db;
 //!
 //! async fn fetch_users(db: Arc<Mutex<rusqlite::Connection>>) -> Vec<User> {
 //!     const SQL: &str = "SELECT id, name FROM users";

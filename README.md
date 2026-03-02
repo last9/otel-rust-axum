@@ -1,4 +1,4 @@
-# rust-otel-auto
+# otel-rust-axum
 
 Minimal-setup OpenTelemetry instrumentation for **Rust 1.74 + axum 0.6**.
 
@@ -28,21 +28,25 @@ Rust has no runtime agent model (unlike the Java OTel agent), so there is no way
 ```toml
 # Cargo.toml
 [dependencies]
-rust-otel-auto = { git = "https://github.com/last9/rust-opentelemetry", features = ["axum", "reqwest", "db"] }
+otel-rust-axum = { git = "https://github.com/last9/otel-rust-axum", features = ["axum", "reqwest", "db"] }
 axum = "0.6"
 tokio = { version = "1", features = ["full"] }
 tracing = "0.1"
 
-# These two pins are required on Rust < 1.83.
-# url 2.5.1+ and idna 1.0+ pull in icu4x which requires Rust 1.83.
+# Required pins on Rust < 1.83
+# idna 1.0+ and url 2.5.1+ pull in icu4x which requires Rust 1.83.
+# CVE-2024-12224 (moderate): idna < 1.0 accepts certain invalid Punycode labels.
+# This crate only uses url/idna to parse the OTLP endpoint for span attributes —
+# it does not use host comparison for any security or auth decision, so the CVE
+# has no exploitable impact here. Fix requires upgrading to Rust 1.83+.
 url = "=2.5.0"
 idna = "=0.5.0"
 ```
 
 ```rust
 use axum::{Router, middleware, routing::get};
-use rust_otel_auto::{init, current_trace_id};
-use rust_otel_auto::layer::{OtelLayer, record_matched_route};
+use otel_rust_axum::{init, current_trace_id};
+use otel_rust_axum::layer::{OtelLayer, record_matched_route};
 
 #[tokio::main]
 async fn main() {
@@ -118,7 +122,7 @@ let app = Router::new()
 - Injects `traceparent` / `tracestate` into every outgoing request
 
 ```rust
-use rust_otel_auto::client::TracedClient;
+use otel_rust_axum::client::TracedClient;
 
 let data: serde_json::Value = TracedClient::new()
     .get("https://api.example.com/users")
@@ -130,7 +134,7 @@ let data: serde_json::Value = TracedClient::new()
 For use with an existing `reqwest::Client`:
 
 ```rust
-use rust_otel_auto::client::inject_trace_context;
+use otel_rust_axum::client::inject_trace_context;
 
 let mut headers = reqwest::header::HeaderMap::new();
 inject_trace_context(&mut headers);
@@ -217,7 +221,7 @@ Rust OTel library; the official contrib repo has no DB crates.
 The helpers here give you correctly attributed spans with the minimum boilerplate:
 
 ```rust
-use rust_otel_auto::db;
+use otel_rust_axum::db;
 
 // SQLite — sets db.system, db.operation, db.statement, db.sql.table
 let span = db::sqlite_span("SELECT", "SELECT id, name FROM users WHERE id = ?1", "users");
@@ -250,7 +254,7 @@ and breaks axum's handler bound. See the [example](https://github.com/last9/open
 Same pattern — `db_span` works for any database. Pass the DBMS name as the first argument:
 
 ```rust
-use rust_otel_auto::db;
+use otel_rust_axum::db;
 
 async fn get_orders(pool: &deadpool_postgres::Pool) -> Vec<Order> {
     const SQL: &str = "SELECT id, total FROM orders WHERE user_id = $1";
@@ -312,7 +316,7 @@ async move { conn.exec::<Row, _, _>(SQL, (id,)).await }
 `current_trace_id()` returns the OTel trace ID of the current span as a 32-char hex string. Use it to link log lines directly to traces in Last9 APM:
 
 ```rust
-tracing::info!(trace_id = %rust_otel_auto::current_trace_id(), "user created");
+tracing::info!(trace_id = %otel_rust_axum::current_trace_id(), "user created");
 ```
 
 Returns `"00000000000000000000000000000000"` when called outside any span.
@@ -320,9 +324,9 @@ Returns `"00000000000000000000000000000000"` when called outside any span.
 ## Project Structure
 
 ```
-rust-opentelemetry/
+otel-rust-axum/
 ├── Cargo.toml                  # Workspace
-└── rust-otel-auto/
+└── otel-rust-axum/
     ├── Cargo.toml
     └── src/
         ├── lib.rs              # init(), current_trace_id(), feature-gated exports

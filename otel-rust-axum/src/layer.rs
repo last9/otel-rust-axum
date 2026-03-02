@@ -4,7 +4,7 @@
 //!
 //! ```rust,no_run
 //! use axum::{Router, middleware, routing::get};
-//! use rust_otel_auto::layer::{OtelLayer, record_matched_route};
+//! use otel_rust_axum::layer::{OtelLayer, record_matched_route};
 //!
 //! let app = Router::new()
 //!     .route("/users/:id", get(handler))
@@ -76,7 +76,7 @@ type OtelService<S> = Trace<
 /// Apply `route_layer` **before** `.layer`:
 /// ```rust,no_run
 /// use axum::{Router, middleware, routing::get};
-/// use rust_otel_auto::layer::{OtelLayer, record_matched_route};
+/// use otel_rust_axum::layer::{OtelLayer, record_matched_route};
 ///
 /// let app = Router::new()
 ///     .route("/users/:id", get(handler))

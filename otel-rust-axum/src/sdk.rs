@@ -13,7 +13,7 @@ use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilte
 ///
 /// Keep this alive for the duration of your program:
 /// ```rust,no_run
-/// let _guard = rust_otel_auto::init().unwrap();
+/// let _guard = otel_rust_axum::init().unwrap();
 /// ```
 #[must_use = "drop this only when the program is shutting down"]
 pub struct TelemetryGuard;
