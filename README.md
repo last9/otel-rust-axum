@@ -25,6 +25,13 @@ Rust has no runtime agent model (unlike the Java OTel agent), so there is no way
 
 ## Quick Start
 
+> **Rust version note**: This crate targets Rust 1.74 and compiles cleanly on it.
+> However, Cargo 1.74 may fail to *resolve* the dependency graph when adding this
+> crate fresh (without a lock file) because newer crates in the registry use
+> `edition = "2024"` which Cargo 1.74 cannot parse. If you hit this, upgrade to
+> Rust/Cargo 1.75+ for the initial `cargo fetch`, then your locked build will work
+> on 1.74.
+
 ```toml
 # Cargo.toml
 [dependencies]
